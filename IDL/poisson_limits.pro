@@ -96,5 +96,5 @@ function poisson_limits, k, cl, sigma=sigma
         endelse
     endfor
 
-	return, p
+    return, p
 end
