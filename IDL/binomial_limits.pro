@@ -54,13 +54,13 @@
 ;           P_L:	The single-sided lower confidence level.
 ;
 ; EXAMPLE:
-;		I have a mass bin with 100 galaxies (20 reds and 80 blues)
-;		and I computing the fraction of reds to blues, then for this
-;		bin NSUCCESS = 20 and NTOTAL = 100.
+;       I have a mass bin with 100 galaxies (20 reds and 80 blues)
+;       and I computing the fraction of reds to blues, then for this
+;       bin NSUCCESS = 20 and NTOTAL = 100.
 ;
-;		To compute the confidence limits at the 2.5 sigma level, use
+;       To compute the confidence limits at the 2.5 sigma level, use
 ;
-;			p = binomial_limits(20, 100, 2.5, /sigma)
+;           p = binomial_limits(20, 100, 2.5, /sigma)
 ;               p.p_u = 0.31756
 ;               p.p_l = 0.11056
 ;
@@ -70,12 +70,9 @@
 ;           0.2 (+0.11756, -0.08944)
 ;
 ; DEPENDENCIES:
-;       BDTRI       - IDL >4.0
-;					  Copyright (c) Tim Haines
-;					  https://github.com/hainest/SmallNumberStatistics
+;       BDTRI   - IDL >5.3
 
 function binomial_limits, nsuccess, ntotal, cl, sigma=sigma
-
 	; Resolve the 'incbi' routine in bdtri.pro so that 'bisection'
 	; can find it with call_function
 	resolve_routine, 'bdtri', /is_function
@@ -105,7 +102,7 @@ function binomial_limits, nsuccess, ntotal, cl, sigma=sigma
             p[i].p_u = bdtri(nsuccess[i], ntotal[i], 1 - cl)
         endelse
         
-        if nsuccess eq 0 then begin
+        if nsuccess[i] eq 0 then begin
             p[i].p_l = 0.0D
         endif else begin
             p[i].p_l = 1 - bdtri(nfail, ntotal[i], 1 - cl)

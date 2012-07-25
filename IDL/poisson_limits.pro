@@ -22,7 +22,7 @@
 ;
 ; PURPOSE:
 ;       This function computes the single-sided upper and lower
-;		confidence limits for the Poisson distribution.
+;       confidence limits for the Poisson distribution.
 ;
 ; CATEGORY:
 ;       Statistics and probability
@@ -49,10 +49,10 @@
 ;           P_L:	The single-sided lower confidence level.
 ;
 ; EXAMPLE:
-;		To compute the confidence limits of seeing 20 events in 8
+;       To compute the confidence limits of seeing 20 events in 8
 ;       seconds at the 2.5sigma, use
 ;
-;			p = poisson_limits(20, 2.5, /sigma)
+;           p = poisson_limits(20, 2.5, /sigma)
 ;               p.p_u = 34.1875
 ;               p.p_l = 10.5711
 ;
@@ -66,13 +66,10 @@
 ;           2.5 (+4.273, -1.321) observations per second
 ;
 ; DEPENDENCIES:
-;       PDTRI       - IDL >4.0
-;					  Copyright (c) Tim Haines
-;					  https://github.com/hainest/SmallNumberStatistics
+;       PDTRI   - IDL >5.3
 
 function poisson_limits, k, cl, sigma=sigma
-
-	; Resolve the 'igami' routine in pdtri.pro so that 'bisection'
+    ; Resolve the 'igami' routine in pdtri.pro so that 'bisection'
 	; can find it with call_function
 	resolve_routine, 'pdtri', /is_function
 
@@ -89,13 +86,13 @@ function poisson_limits, k, cl, sigma=sigma
     p = replicate({p_u:0.0, p_l:0.0}, n_elements(k))
     
     for i=0, n_elements(k)-1 do begin
-        p[i].p_u = pdtri(k, 1 - cl)
+        p[i].p_u = pdtri(k[i], 1 - cl)
         
         ; The single-sided lower limit for k=0 is 0
-        if k eq 0 then begin
+        if k[i] eq 0 then begin
             p[i].p_l = 0.0D
         endif else begin
-            p[i].p_l = pdtri(k - 1, cl)
+            p[i].p_l = pdtri(k[i] - 1, cl)
         endelse
     endfor
 

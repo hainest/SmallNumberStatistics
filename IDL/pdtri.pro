@@ -65,9 +65,7 @@
 ;
 ; DEPENDENCIES:
 ;       IGAMMA      - IDL >4.0
-;		BISECTION   - IDL >4.0
-;                     Copyright (c) Erik Rosolowsky <eros@cosmic>
-;                     https://people.ok.ubc.ca/erosolo/idl/lib/bisection.pro
+;       BISECTION   - IDL >4.0
 
 function pdtri, k, y
     ; check the domain
@@ -91,26 +89,13 @@ function pdtri, k, y
     d = 1 / (9.0D * double(a))
     t = 1 - d - gauss_pdf(p) * sqrt(d)
     x0 = a * (t^3)
-    
-    m = bisection(x0, 'igami', itmax=200, radius=x0, tol=1e-7, /double)
 
-    catch, error_status
-
-    if error_status ne 0 or m eq 0 then begin
-        message, strjoin(['bisection did not converge. k=', string(k), $
-                ' may be too large. Try using the normal distribution.'])
-    endif
-    
-    return, m
+    return, bisection(x0, 'igami', itmax=200, radius=x0, tol=1e-7)
 end
 
 function igami, x
-	common igami_parms
-    
-    ; This exploits the behaviour of 'bisection' to avoid negative
-    ; roots which are unallowed by the definition of the Poisson
-    ; parameter
-    if x < 0 then return, 0
+    compile_opt idl2, hidden
+    common igami_parms
     
 	return, 1 - igamma(a+1, x, /double) - p
 end

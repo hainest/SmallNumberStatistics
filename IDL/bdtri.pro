@@ -62,12 +62,11 @@
 ;
 ; DEPENDENCIES:
 ;       IBETA       - IDL >4.0
-;		BISECTION   - IDL >4.0
-;                     Copyright (c) Erik Rosolowsky <eros@cosmic>
-;                     https://people.ok.ubc.ca/erosolo/idl/lib/bisection.pro
+;       BISECTION   - IDL >4.0
 
 function bdtri, k, n, y
-
+    compile_opt idl2
+    
 	; check the domain
     if k lt 0 then begin
         message, 'bdtri domain error: k must be strictly nonnegative'
@@ -94,10 +93,12 @@ function bdtri, k, n, y
 	b = n
 	p = y
 
-    return, 1 - bisection(0.5, 'incbi', itmax=200, radius=0.5, tol=1e-7, /double)
+    return, 1 - bisection(0.5, 'incbi', itmax=200, radius=0.5, tol=1e-7)
 end
 
 function incbi, x
-	common incbi_parms
+    compile_opt idl2, hidden
+    common incbi_parms
+    
 	return, ibeta(b-a, a+1, x) - p
 end
