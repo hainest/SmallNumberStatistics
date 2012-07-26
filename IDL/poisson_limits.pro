@@ -44,17 +44,20 @@
 ;               parameter CL.
 ;
 ; RETURNS:
-;       A list of structs containing two tags:
-;           P_U:    The single-sided upper confidence level.
-;           P_L:	The single-sided lower confidence level.
+;       A two-dimensional array such that the array P[*,0] contains the upper
+;       single-sided confidence limits, and the array P[*,1] contains the lower
+;       single-sided confidence limits.
+;
+; REFERENCES:
+;       N. Gehrels. Confidence limits for small numbers of events in astrophysical
+;       data. The Astrophysical Journal, 303:336–346, April 1986.
 ;
 ; EXAMPLE:
 ;       To compute the confidence limits of seeing 20 events in 8
-;       seconds at the 2.5sigma, use
+;       seconds at the 2.5 sigma, use
 ;
 ;           p = poisson_limits(20, 2.5, /sigma)
-;               p.p_u = 34.1875
-;               p.p_l = 10.5711
+;               p = [ [34.1875], [10.5711] ]
 ;
 ;       However, recall that the Poisson parameter is defined as the
 ;       average rate, so it is necessary to divide these values by
@@ -83,16 +86,16 @@ function poisson_limits, k, cl, sigma=sigma
         cl = gaussint(cl)
     endif
    
-    p = replicate({p_u:0.0, p_l:0.0}, n_elements(k))
+    p = make_array(n_elements(k), 2, /double)
     
     for i=0, n_elements(k)-1 do begin
-        p[i].p_u = pdtri(k[i], 1 - cl)
+        p[i,0] = pdtri(k[i], 1 - cl)
         
-        ; The single-sided lower limit for k=0 is 0
+        ; See Gehrels (1986) for details
         if k[i] eq 0 then begin
-            p[i].p_l = 0.0D
+            p[i,1] = 0.0D
         endif else begin
-            p[i].p_l = pdtri(k[i] - 1, cl)
+            p[i,1] = pdtri(k[i] - 1, cl)
         endelse
     endfor
 

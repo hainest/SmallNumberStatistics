@@ -49,9 +49,13 @@
 ;               parameter CL.
 ;
 ; RETURNS:
-;       A list of structs containing two tags:
-;           P_U:    The single-sided upper confidence level.
-;           P_L:	The single-sided lower confidence level.
+;       A two-dimensional array such that the array P[*,0] contains the upper
+;       single-sided confidence limits, and the array P[*,1] contains the lower
+;       single-sided confidence limits.
+;
+; REFERENCES:
+;       N. Gehrels. Confidence limits for small numbers of events in astrophysical
+;       data. The Astrophysical Journal, 303:336–346, April 1986.
 ;
 ; EXAMPLE:
 ;       I have a mass bin with 100 galaxies (20 reds and 80 blues)
@@ -61,8 +65,7 @@
 ;       To compute the confidence limits at the 2.5 sigma level, use
 ;
 ;           p = binomial_limits(20, 100, 2.5, /sigma)
-;               p.p_u = 0.31756
-;               p.p_l = 0.11056
+;               p = [ [0.31756], [0.11056] ]
 ;
 ;       Since these are the confidence limits, the fraction would be
 ;       reported as
@@ -91,21 +94,23 @@ function binomial_limits, nsuccess, ntotal, cl, sigma=sigma
         message, 'nsuccess and total must have same size'
     endif
     
-    p = replicate({p_u:0.0, p_l:0.0}, n_elements(nsuccess))
+    p = make_array(n_elements(nsuccess), 2, /double)
     
     for i=0, n_elements(nsuccess)-1 do begin
         nfail = ntotal[i] - nsuccess[i];
         
+        ; See Gehrels (1986) for details
         if nfail eq 0 then begin
-            p[i].p_u = 1.0D
+            p[i,0] = 1.0D
         endif else begin
-            p[i].p_u = bdtri(nsuccess[i], ntotal[i], 1 - cl)
+            p[i,0] = bdtri(nsuccess[i], ntotal[i], 1 - cl)
         endelse
         
+        ; See Gehrels (1986) for details        
         if nsuccess[i] eq 0 then begin
-            p[i].p_l = 0.0D
+            p[i,1] = 0.0D
         endif else begin
-            p[i].p_l = 1 - bdtri(nfail, ntotal[i], 1 - cl)
+            p[i,1] = 1 - bdtri(nfail, ntotal[i], 1 - cl)
         endelse
     endfor
 
