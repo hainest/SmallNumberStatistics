@@ -46,8 +46,7 @@ use SmallNumberStatistics qw(binomialLimits poissonLimits);
 #
 ##########################################################################
 
-my ($nsuccess, $ntotal, $u, $l, $cl, $opt);
-$opt = {'sigma' => 1};
+my ($nsuccess, $ntotal, $u, $l, $cl);
 
 $nsuccess = 9;
 $ntotal = 109;
