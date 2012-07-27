@@ -280,7 +280,7 @@ sub poissonLimits
 #
 # EXAMPLE:
 #       I have a mass bin with 100 galaxies (20 reds and 80 blues)
-#       and I computing the fraction of reds to blues, then for this
+#       and I am computing the fraction of reds to blues, then for this
 #       bin NSUCCESS = 20 and NTOTAL = 100.
 #
 #       To compute the confidence limits at the 2.5 sigma level, using
