@@ -161,7 +161,7 @@ def binomialLimits(nsuccess, ntotal, cl=None, sigma=False):
 #       Statistics and probability
 #
 # CALLING SEQUENCE:
-#       p = poissonLimits(k, [cl [, sigma]])
+#       (u,l) = poissonLimits(k, [cl [, sigma]])
 #
 # INPUTS:
 #       k:      A strictly nonnegative integer that specifies the
