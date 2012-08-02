@@ -95,7 +95,7 @@ def binomialLimits(nsuccess, ntotal, cl=None, sigma=False):
        Since these are the confidence limits, the fraction would be
        reported as
 
-           0.2 (+0.11756, -0.08944
+           0.2 (+0.11756, -0.08944)
 """
     if cl is None:
         cl = 1.0
