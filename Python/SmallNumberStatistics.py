@@ -79,7 +79,7 @@ def binomialLimits(nsuccess, ntotal, cl=None, sigma=False):
 
  REFERENCES:
        N. Gehrels. Confidence limits for small numbers of events in astrophysical
-       data. The Astrophysical Journal, 303:336–346, April 1986.
+       data. The Astrophysical Journal, 303:336-346, April 1986.
 
  EXAMPLE:
        I have a mass bin with 100 galaxies (20 reds and 80 blues)
@@ -195,7 +195,7 @@ def poissonLimits(k, cl=None, sigma=False):
 
  REFERENCES:
        N. Gehrels. Confidence limits for small numbers of events in astrophysical
-       data. The Astrophysical Journal, 303:336–346, April 1986.
+       data. The Astrophysical Journal, 303:336-346, April 1986.
 
  EXAMPLE:
        Compute the confidence limits of seeing 20 events in 8
