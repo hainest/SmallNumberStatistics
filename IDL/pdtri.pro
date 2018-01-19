@@ -69,7 +69,7 @@
 
 function igami, x
     compile_opt idl2, hidden
-    common igami_parms
+    common igami_parms, a, p
     
 	return, 1 - igamma(a+1, x, /double) - p
 end
@@ -88,7 +88,7 @@ function pdtri, k, y
         message, 'pdtri domain error: y must be in the interval [0, 1)'
     endif
     
-	common igami_parms, a, p
+	common igami_parms
 	a = k
 	p = y
     
