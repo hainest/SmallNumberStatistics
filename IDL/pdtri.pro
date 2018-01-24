@@ -67,6 +67,13 @@
 ;       IGAMMA      - IDL >4.0
 ;       BISECTION   - IDL >4.0
 
+function igami, x
+    compile_opt idl2, hidden
+    common igami_parms, a, p
+    
+	return, 1 - igamma(a+1, x, /double) - p
+end
+
 function pdtri, k, y
     ; check the domain
     if k lt 0 then begin
@@ -81,7 +88,7 @@ function pdtri, k, y
         message, 'pdtri domain error: y must be in the interval [0, 1)'
     endif
     
-	common igami_parms, a, p
+	common igami_parms
 	a = k
 	p = y
     
@@ -91,11 +98,4 @@ function pdtri, k, y
     x0 = a * (t^3)
 
     return, bisection(x0, 'igami', itmax=200, radius=x0, tol=1e-7)
-end
-
-function igami, x
-    compile_opt idl2, hidden
-    common igami_parms
-    
-	return, 1 - igamma(a+1, x, /double) - p
 end

@@ -72,9 +72,6 @@
 ;       PDTRI   - IDL >5.3
 
 function poisson_limits, k, cl, sigma=sigma
-    ; Resolve the 'igami' routine in pdtri.pro so that 'bisection'
-	; can find it with call_function
-	resolve_routine, 'pdtri', /is_function
 
     ; Set CL = 1 sigma by default
     if ~keyword_set(cl) then begin

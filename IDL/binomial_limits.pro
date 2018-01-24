@@ -76,9 +76,6 @@
 ;       BDTRI   - IDL >5.3
 
 function binomial_limits, nsuccess, ntotal, cl, sigma=sigma
-	; Resolve the 'incbi' routine in bdtri.pro so that 'bisection'
-	; can find it with call_function
-	resolve_routine, 'bdtri', /is_function
 	
 	; Set CL = 1 sigma by default
     if ~keyword_set(cl) then begin

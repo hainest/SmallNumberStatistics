@@ -64,6 +64,13 @@
 ;       IBETA       - IDL >4.0
 ;       BISECTION   - IDL >4.0
 
+function incbi, x
+    compile_opt idl2, hidden
+    common incbi_parms, a, b, p
+    
+	return, ibeta(b-a, a+1, x) - p
+end
+
 function bdtri, k, n, y
     compile_opt idl2
     
@@ -88,17 +95,10 @@ function bdtri, k, n, y
         message, 'bdtri domain error: y must be in the interval [0,1]'
     endif
     
-	common incbi_parms, a, b, p
+	common incbi_parms
 	a = k
 	b = n
 	p = y
 
     return, 1 - bisection(0.5, 'incbi', itmax=200, radius=0.5, tol=1e-7)
-end
-
-function incbi, x
-    compile_opt idl2, hidden
-    common incbi_parms
-    
-	return, ibeta(b-a, a+1, x) - p
 end
