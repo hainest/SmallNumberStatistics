@@ -40,7 +40,7 @@ def binomialLimits(nsuccess, ntotal, cl=None, sigma=False):
        binomialLimits
 
  AUTHOR:
-       Tim Haines, tdhq36@mail.umkc.edu
+       Tim Haines, thaines.astro@gmail.com
 
  PURPOSE:
        This function computes the single-sided upper and lower
@@ -161,7 +161,7 @@ def poissonLimits(k, cl=None, sigma=False):
        poissonLimits
 
  AUTHOR:
-       Tim Haines, tdhq36@mail.umkc.edu
+       Tim Haines, thaines.astro@gmail.com
 
  PURPOSE:
        This function computes the single-sided upper and lower

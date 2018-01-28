@@ -18,7 +18,7 @@
 ;       POISSON_LIMITS
 ;
 ; AUTHOR:
-;       Tim Haines, tdhq36@mail.umkc.edu
+;       Tim Haines, thaines.astro@gmail.com
 ;
 ; PURPOSE:
 ;       This function computes the single-sided upper and lower

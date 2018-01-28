@@ -18,7 +18,7 @@
 ;       TEST
 ;
 ; AUTHOR:
-;       Tim Haines, tdhq36@mail.umkc.edu
+;       Tim Haines, thaines.astro@gmail.com
 ;
 ; PURPOSE:
 ;       This function tests binomial_limits and poisson_limits for

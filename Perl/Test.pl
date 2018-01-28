@@ -29,7 +29,7 @@ use SmallNumberStatistics qw(binomialLimits poissonLimits);
 #       Test
 #
 # AUTHOR:
-#       Tim Haines, tdhq36@mail.umkc.edu
+#       Tim Haines, thaines.astro@gmail.com
 #
 # PURPOSE:
 #       This tests binomialLimits and poissonLimits of the
