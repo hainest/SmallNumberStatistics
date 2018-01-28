@@ -5,7 +5,7 @@ Computations of small-number statistics using binomial and Poisson distributions
 
 -------------------------------------------------------------------------------------
 
-Copyright (c) 2012, Tim Haines
+Copyright (c) 2012-2018, Tim Haines
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
