@@ -71,7 +71,7 @@ function igami, x
     compile_opt idl2, hidden
     common igami_parms, a, p
     
-	return, 1 - igamma(a+1, x, /double) - p
+	return, 1 - igamma(a, x, /double) - p
 end
 
 function pdtri, k, y
@@ -89,7 +89,7 @@ function pdtri, k, y
     endif
     
 	common igami_parms
-	a = k
+	a = k + 1
 	p = y
     
     ; Set the starting point according to the normal approximation

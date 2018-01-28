@@ -94,6 +94,19 @@ pro test
     if abs(p[0,0]-133.8) gt 0.1 or abs(p[0,1]-72.65) gt 0.1 then begin
         message, 'Poisson: Not close to Gehrels - 2!'
     endif
+    
+    ; Test opposite extremum
+    k = 0
+    p = poisson_limits(k)
+    if abs(p[0,0]-1.841) gt 0.1 or abs(p[0,1]-0.0) gt 0.1 then begin
+        message, 'Poisson: k=0 failed!'
+    endif
+    
+    k = 1
+    p = poisson_limits(k)
+    if abs(p[0,0]-3.299) gt 0.1 or abs(p[0,1]-0.1727) gt 0.1 then begin
+        message, 'Poisson: k=1 failed!'
+    endif
    
    print, 'OK' 
 end
