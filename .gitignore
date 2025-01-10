@@ -5,3 +5,12 @@
 
 # Python caching
 __pycache__
+
+cprob/
+
+*.ps
+*.jpg
+*.pdf
+*.odt
+*.lyx~
+*.bak.*
