@@ -1,0 +1,1603 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass emulateapj
+\begin_preamble
+
+\end_preamble
+\use_default_options true
+\begin_modules
+enumitem
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered true
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks false
+\pdf_backref section
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Abstract
+We describe novel methods for determining accurate confidence limits using
+ the binomial and Poisson distributions for small datasets; explore how
+ and when each distribution should be used; and provide code implementing
+ our methods.
+ Example applications from astronomy are briefly described.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keywords{Methods: data analysis --- Methods: statistical}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+title{Counting Statistics for Small Datasets}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+author{Tim Haines, Daniel H McIntosh}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+affil{Department of Physics and Astronomy, University of Missouri - Kansas
+ City, 5110 Rockhill Road, Kansas City, MO 64110, USA}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Being at the forefront of observational astronomy requires competing for
+ ever-increasingly expensive telescope time.
+ This drives the need to derive as much information from as few observations
+ as possible.
+ Moreover, if our small number of observations are to be used in an attempt
+ to discriminate between competing hypotheses, correctly determining the
+ confidence limits of our data is paramount.
+ If these values are not precisely determined, then we may incorrectly conclude
+ that our data do not allow for the exclusion of a hypothesis that is not
+ actually supported by the data or vice versa.
+\end_layout
+
+\begin_layout Standard
+To understand the precision of a measurement, we represent our answer within
+ a possible range of values (confidence limits) based on a confidence level
+ (CL).
+ The confidence level answers the question, 
+\begin_inset Quotes eld
+\end_inset
+
+How certain do I want to be of my measurements?
+\begin_inset Quotes erd
+\end_inset
+
+ The confidence limits answer the question, 
+\begin_inset Quotes eld
+\end_inset
+
+What are the minimum and maximum values of the interval that contains the
+ true value of my measurement with the certainty of my confidence level?
+\begin_inset Quotes erd
+\end_inset
+
+ The choice of CL is usually given as a multiple of the standard deviation
+ (e.g., the 
+\begin_inset Quotes eld
+\end_inset
+
+1-sigma
+\begin_inset Quotes erd
+\end_inset
+
+ level) or as a percent (e.g., the 95% confidence level) reflecting the desired
+ coverage of variance.
+\end_layout
+
+\begin_layout Standard
+Before the confidence limits are computed, an assumption of underlying distribut
+ion is made for the data.
+ The ever-vigilant normal distribution is nearly always the go-to for the
+ assumed distribution of measurements in astronomy.
+ This isn't always an incorrect assumption.
+ The Central Limit Theorem tells us that as the number of observations increases
+ to a sufficiently large size (formally, infinity), the distribution of
+ measured values will take on the form of the normal (Gaussian) distribution.
+ The sole assumption is that the errors are small, random, and not systematic.
+ However, we will see that the normal distribution is insufficient for accuratel
+y describing confidence limits when the number of measurements is small.
+ Instead, we must rely on distributions such as the Poisson or binomial
+ when our data do not satisfy the conditions of the Central Limit Theorem.
+\end_layout
+
+\begin_layout Standard
+Much effort has been put forth to find ways of computing confidence limits
+ for small data sets as accurately and as simply as possible.
+ The most prominent of which is the long-standing work of 
+\begin_inset CommandInset citation
+LatexCommand citet
+before "G86;"
+key "gehrels1986"
+literal "true"
+
+\end_inset
+
+.
+ 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "ebeling2003"
+literal "true"
+
+\end_inset
+
+ expands the G86 approximations for the Poisson distribution in the regime
+ of very large confidence levels.
+ Efforts to utilize Bayesian analysis 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "kraft1991,cameron2011"
+literal "true"
+
+\end_inset
+
+ have been fruitful in providing more accurate coverage of the confidence
+ intervals.
+ We describe a novel method of accurately and quickly computing confidence
+ limits of the binomial and Poisson distributions by exploiting the fact
+ that their respecitve cummulative distribution functions are the well-known
+ incomplete beta and complemented incomplete gamma functions.
+ Our method removes the reliance on approximations, interpolation in tables,
+ or resorting to direct solution of the inverse of a cumulative distribution
+ function (cf.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "clopper1934"
+literal "true"
+
+\end_inset
+
+).
+ Further, we provide code in three of the most common languages used in
+ the astronomical community to facilitate utilization of our method.
+\end_layout
+
+\begin_layout Subsection
+Confidence Limits and Coverage
+\end_layout
+
+\begin_layout Standard
+Explain one-sided versus two-sided.
+ Explain coverage with an analogy of throwing darts at a target with a circle
+ drawn on it.
+ If you make the circle bigger (i.e., increase the confidence level), you
+ are more likely to put a dart inside of the circle.
+ Have a robot throw a random (but unknown!) number of darts.
+ You count the number of darts inside the circle.
+ If you make it smaller, then you have a better chance of knowing that any
+ dart inside of the circle came close to the center of the circle, but far
+ fewer darts will be inside of the circle.
+\end_layout
+
+\begin_layout Subsection
+An Illustrative Example
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:An-Illustrative-Example"
+
+\end_inset
+
+Here, we work through an example situation that is the primary driver for
+ this work.
+ Let us assume that we have two hypothetical initial mass functions (IMFs)
+ which differ only in the predicted fraction of nebulae containing more
+ than 30% A-type stars.
+ The first IMF predicts that the fraction of nebulae will never exceed 20%.
+ The second IMF predicts that the fraction of nebulae can exceed 20%.
+ Taking the prediction of the first IMF to be the null hypothesis, we perform
+ our tests against the second IMF.
+ Using a sample of fifty nebulae found in the Milky Way, we count the number
+ of A-type stars in each and find that 5 (10%) nebulae have more than 30%
+ A-type stars.
+\end_layout
+
+\begin_layout Standard
+Since all measurements contain random error, we must now attempt to quantify
+ it.
+ If we treat the fraction of nebulae we observed to have more than 30% A-type
+ stars as a probability and assume that the data are normally distributed,
+ we find the upper and lower confidence limits at the 1-sigma confidence
+ level (see Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:CalcConfLims"
+
+\end_inset
+
+) to be 24.1% and 0%, respectively.
+ Given these confidence limits, we see that the fraction of nebulae having
+ more than 30% A-type stars can exceed 20% (the upper limit being 
+\begin_inset Formula $\sim24$
+\end_inset
+
+%), so we reject the null hypothesis.
+ As we shall see later in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Distributions"
+
+\end_inset
+
+, this problem is more appropriately described by the binomial distribution
+ where a 
+\begin_inset Quotes eld
+\end_inset
+
+success
+\begin_inset Quotes erd
+\end_inset
+
+ is taken as a nebula having more than 30% A-type stars.
+ Under this assumption, we find that the upper and lower confidence limits
+ at the 1-sigma confidence level are 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+15.89
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+% and 7.19%, respectively, so we accept the null hypothesis.
+\end_layout
+
+\begin_layout Standard
+Clearly, the choice of assumed distribution strongly affects the outcome
+ of our analysis.
+ Our first priority, then, is to determine which distribution best describes
+ our measurements.
+ In Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Distributions"
+
+\end_inset
+
+, we discuss the definitions, characteristics, and usages of the two most
+ relevant distributions for 
+\shape italic
+small
+\shape default
+ datasets in astrophysics: the binomial and the Poisson, and provide a general
+ overview of the normal distribution.
+ The technical details of how confidence limits are calculated using these
+ distributions is provided in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:CalcConfLims"
+
+\end_inset
+
+.
+ We compare the normal, binomial, and Poisson distributions in the small
+ number regime in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:discussion"
+
+\end_inset
+
+.
+ In Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:discussion"
+
+\end_inset
+
+, we provide a comparison of our methods of computing confidence limits
+ to the long-standing and ubiquitous methods provided in G86.
+ Finally, Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Using-Our-Code"
+
+\end_inset
+
+ outlines computing confidence limits using our freely-distributed code.
+\end_layout
+
+\begin_layout Section
+Distributions
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Distributions"
+
+\end_inset
+
+There are a multitude of distributions governing the statistics of discrete
+ processes.
+ Most of them are strongly related– sometimes varying only in a single requireme
+nt (e.g., the binomial and hypergeometric distributions differ only in assumption
+ of independence).
+ Nearly all measurements in astrophysics can be described or approximated
+ by the normal, Poisson, or binomial distribution.
+ Here, we outline of the properties of each.
+\end_layout
+
+\begin_layout Subsection
+Normal Distribution
+\end_layout
+
+\begin_layout Standard
+The normal (Gaussian) distribution is the most ubiquitous distribution in
+ all of statistics as its relatively simple form allows modelling complex
+ processes with minimal computational overhead.
+ The Central Limit Theorem guarantees statistical utility inconsequential
+ of the real distribution underlying the data– so long as a sufficiently
+ large number of measurements are performed.
+ Given its simplicity and utility, it is no surprise that it finds a great
+ deal of use in the astronomical community.
+ But it does have limitations; especially when the number of measurements
+ is small.
+ Exactly how large that number must be is explored in detail in Section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:discussion"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Binomial Distribution
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:BinomialDist"
+
+\end_inset
+
+The binomial distribution describes performing a measurement as executing
+ a trial of some particular process having only two possible outcomes.
+ These outcomes are most normally labeled 
+\begin_inset Quotes eld
+\end_inset
+
+success
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+failure
+\begin_inset Quotes erd
+\end_inset
+
+ with the actual meaning depending on the process being tested.
+ Each measurement is performed in exactly the same way- that is, every trial
+ must be performed by an identical method.
+ The outcome between any two trials is assumed to be equally likely such
+ that the order in which the trials are performed is inconsequential.
+ Mathematicians would say that the binomial distribution describes 
+\begin_inset Quotes eld
+\end_inset
+
+the output of performing N Bernoulli trials.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Examples of this type of behavior are demonstrated in determining the fraction
+ of red galaxies in a mass range, the relative ratio of mergers for blue
+ and red galaxies at a given redshift, or testing a statement by making
+ observations which can be described as a success or failure (e.g., our example
+ problem in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:An-Illustrative-Example"
+
+\end_inset
+
+).
+ Generally, the binomial distribution is used when the outcome can, essentially,
+ be determined by the flip of a coin or the roll of a die.
+ Specifically, it is used whenever a fraction is computed.
+\end_layout
+
+\begin_layout Subsection
+Poisson Distribution
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:PoissonDist"
+
+\end_inset
+
+The Poisson distribution describes any process having events that are discrete,
+ random, and independent.
+ Given the generic nature of these characteristics, the Poisson distribution
+ is often used for describing stochastic processes such as time- or space-rates
+ of events.
+\end_layout
+
+\begin_layout Standard
+Examples of this type of behavior are the detection of photons at a CCD,
+ determining rate at which galaxies are merging in a fixed volume, the number
+ of supernovae since z=1, or the number of S0 galaxies in a cluster.
+ Because the defining characteristics of the Poisson distribution are so
+ generic, it is most often the type of distribution underlying any type
+ of time analysis.
+ The principal parameter of the distribution is known as the Poisson parameter
+ (usually denoted as λ), and is taken to be the average rate of the events
+ being measured– a fact that should be kept in mind when expressing Poisson
+ confidence limits.
+\end_layout
+
+\begin_layout Section
+Calculating Confidence Limits
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:CalcConfLims"
+
+\end_inset
+
+Each distribution has a different set of rules for computing confidence
+ limits.
+ However, the double-sided confidence levels always come from the standard
+ normal distribution via the formula
+\begin_inset Formula 
+\begin{equation}
+\begin{array}{ccl}
+CL\left(S\right) & = & \frac{1}{\sqrt{2\pi}}\int_{-S}^{S}\exp\left(-z^{2}/2\right)dz\\
+ & = & erf\left(S/\sqrt{2}\right)
+\end{array}\label{eq:CL}
+\end{equation}
+
+\end_inset
+
+where S is the number of standard deviations desired and 
+\begin_inset Formula $erf$
+\end_inset
+
+ is the error function.
+ For instance, the more famous confidence limits are the 1-sigma level at
+ 68.26%, the 2-sigma level at 95.45%, and the 3-sigma level at 99.73%.
+\end_layout
+
+\begin_layout Standard
+We usually consider probability distributions by thinking about finding
+ the cumulative probability of a sequence of events knowing the probability
+ of an individual event (or the mean of many).
+ However, the probability of an individual event is precisely what we wish
+ to find in order to assign confidence limits to our measurements.
+ We thus have to think about the inverse of a probability distribution.
+ This is not an easy task as most probability distribution functions are
+ given in terms of complicated transcendental functions whose inverses do
+ not have closed-form solutions.
+ We outline our methods for determining the confidence limits of each distributi
+on.
+\end_layout
+
+\begin_layout Subsection
+Normal Confidence Limits
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:NormalConfLims"
+
+\end_inset
+
+For large samples of 
+\begin_inset Formula $N$
+\end_inset
+
+ observations, the two-sided upper and lower confidence limits may be estimated
+ by the standard deviation of the mean (also known as the standard error)
+ given the sample mean 
+\begin_inset Formula $\bar{x}$
+\end_inset
+
+ and non-biased sample standard deviation 
+\begin_inset Formula $s$
+\end_inset
+
+ by
+\begin_inset Formula 
+\begin{equation}
+\bar{x}\pm\frac{s}{\sqrt{N}}.\label{eq:SDOM}
+\end{equation}
+
+\end_inset
+
+Often in astronomy, the confidence limits are computed by assuming 
+\begin_inset Formula $s=1$
+\end_inset
+
+ in Equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:SDOM"
+
+\end_inset
+
+.
+ In this instance, the sample is said to come from the 
+\shape italic
+standard
+\shape default
+ normal distribution, and the limits are referred to as the 
+\begin_inset Quotes eld
+\end_inset
+
+root-N
+\begin_inset Quotes erd
+\end_inset
+
+ limits.
+ For the example problem in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:An-Illustrative-Example"
+
+\end_inset
+
+ taking 
+\begin_inset Formula $\bar{x}=5/50=0.1$
+\end_inset
+
+, 
+\begin_inset Formula $N=50$
+\end_inset
+
+, and 
+\begin_inset Formula $s=1$
+\end_inset
+
+, we calculate the root-N limits to be 24.1% and 0% as shown there.
+ The lower limit is actually found to be negative, but negative probabilities
+ are not allowed so we clip to 0%.
+\end_layout
+
+\begin_layout Standard
+If we know that our small sample of measurements is truly drawn from the
+ normal distribution, then the confidence limits are given by 
+\begin_inset Formula $U_{CL}=\bar{x}\pm t^{\prime}\,s/\sqrt{N}$
+\end_inset
+
+ where 
+\begin_inset Formula $t^{\prime}$
+\end_inset
+
+ is the parameter for the Student's t-distribution with 
+\begin_inset Formula $N-1$
+\end_inset
+
+ degrees of freedom at the 
+\begin_inset Formula $CL$
+\end_inset
+
+ confidence level
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The student's t-distribution uses the significance level, 
+\begin_inset Formula $\alpha$
+\end_inset
+
+, given by 
+\begin_inset Formula $\alpha=1-\mathtt{CL}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+.
+ For our example problem, the confidence limits are 
+\begin_inset Formula $U_{1\sigma}=0.1\pm0.3795\cdot\left(1/\sqrt{50}\right)$
+\end_inset
+
+ giving 15.37% and 4.63% for the upper and lower limits, respectively.
+ These values are much closer to those achieved using the binomial distribution
+ as discussed in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:An-Illustrative-Example"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Binomial Confidence Limits
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:binConfLimits"
+
+\end_inset
+
+Utilizing the same process employed by the inverse binomial distribution
+ (
+\noun on
+bdtri)
+\noun default
+ function in the Cephes
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+© Stephen Mosier; http://www.netlib.org/cephes/
+\end_layout
+
+\end_inset
+
+ library, we compute binomial confidence limits by using the relationship
+ between the binomial distribution and the incomplete beta function.
+ For a measurement of 
+\begin_inset Formula $N_{s}$
+\end_inset
+
+ successes out of a total of 
+\begin_inset Formula $N$
+\end_inset
+
+ Bernoulli trials, we seek the event probability 
+\begin_inset Formula $p$
+\end_inset
+
+ such that the sum of the terms 0 through 
+\begin_inset Formula $N_{s}$
+\end_inset
+
+ of the binomial probability density function is equal to the specified
+ cumulative probability 
+\begin_inset Formula $y$
+\end_inset
+
+.
+ This is accomplished by using the inverse of the regularized incomplete
+ beta function 
+\begin_inset Formula $B^{-1}\left(a,b;y\right)$
+\end_inset
+
+ and the relation
+\begin_inset Newline linebreak
+\end_inset
+
+ 
+\begin_inset Formula $p=1-B^{-1}(a,b;y)$
+\end_inset
+
+.
+ To find the solution to this equation, we find the event probability
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In computing the event probability, we consider only the comparison of the
+ number of events of a single type to the total number of events (e.g., number
+ of successes as a fraction of total), and refer the reader to G86 for other
+ types of comparisons.
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Formula $p$
+\end_inset
+
+ such that
+\begin_inset Formula 
+\begin{equation}
+\begin{array}{ccl}
+y & = & B\left(p;\,a,\,b\right)\\
+ & = & \int_{0}^{p}t^{a-1}\left(1-t\right)^{b-1}dt
+\end{array}\label{eq:incbi}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $B\left(p;a,b\right)$
+\end_inset
+
+ is the regularized incomplete beta function.
+ We solve Equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:incbi"
+
+\end_inset
+
+ using the bisection root-finding algorithm with an initial value of 
+\begin_inset Formula $0.5$
+\end_inset
+
+ and search radius of 
+\begin_inset Formula $0.5$
+\end_inset
+
+ to ensure convergence to the correct value of 
+\begin_inset Formula $p$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Assuming the normalized liklihood from 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "cameron2011"
+literal "true"
+
+\end_inset
+
+, the upper and lower double-sided confidence limits are computed using
+ the beta distribution parameters 
+\begin_inset Formula $a=N_{s}+1$
+\end_inset
+
+, 
+\begin_inset Formula $b=N-N_{s}+1$
+\end_inset
+
+, and 
+\begin_inset Formula $y=\left(1-CL\right)/2$
+\end_inset
+
+.
+ Combining these with the Cephes definition of 
+\begin_inset Formula $B^{-1}\left(a,b;y\right)$
+\end_inset
+
+, we find the upper and lower limits are given by 
+\begin_inset Formula $p_{u}=1-B^{-1}\left(a,b;y\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p_{l}=1-B^{-1}\left(a,b;1-y\right)$
+\end_inset
+
+, respectively.
+\end_layout
+
+\begin_layout Standard
+The confidence limits in our example problem are computed with 
+\begin_inset Formula $y=\left(1-CL(1)\right)/2$
+\end_inset
+
+ (cf.
+ Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:CL"
+
+\end_inset
+
+), 
+\begin_inset Formula $N=50$
+\end_inset
+
+, and 
+\begin_inset Formula $N_{s}=5$
+\end_inset
+
+.
+ Solving Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:incbi"
+
+\end_inset
+
+ with these parameters gives an upper confidence limit of 
+\begin_inset Formula $p_{u}=15.89\%$
+\end_inset
+
+ and a lower limit of 
+\begin_inset Formula $p_{l}=7.19\%$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Poisson Confidence Limits
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:PoissonConfLims"
+
+\end_inset
+
+Mirroring the method of the inverse Poisson distribution 
+\noun on
+(pdtri)
+\noun default
+ function in the Cephes library, we determine confidence limits by exploiting
+ the relationship between the Poisson distribution and the complemented
+ incomplete gamma function.
+ For a measurement of K Poisson events, we seek the Poisson parameter λ
+ such that the integral from 0 to λ of the Poisson probability density function
+ is equal to the given cumulative probability 
+\begin_inset Formula $y$
+\end_inset
+
+.
+ This is accomplished by using the inverse complemented lower incomplete
+ gamma function and the relation 
+\begin_inset Formula $\lambda=\gamma^{-1}\left(a;y\right)$
+\end_inset
+
+.
+ To find the solution to this equation, we find the parameter λ such that
+\begin_inset Formula 
+\begin{equation}
+y=1-\gamma\left(\lambda,a\right)=1-\int_{0}^{\lambda}t^{a-1}e^{-t}dt\label{eq:igami}
+\end{equation}
+
+\end_inset
+
+We use the bisection root-finding algorithm with the starting point 
+\begin_inset Formula $\lambda=K\left[1-\frac{1}{9K}-\sqrt{\frac{1}{9K}}\Phi^{-1}(y)\right]^{3}$
+\end_inset
+
+ where 
+\begin_inset Formula $\Phi^{-1}$
+\end_inset
+
+ is the inverse of the standard normal distribution used in the Cephes 
+\noun on
+pdtri
+\noun default
+ function, and allow only positive roots as the Poisson parameter is defined
+ to be positive.
+ For the two-sided confidence interval, we utilize the parameters outlined
+ in Equation (15) of 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "cousins2007"
+literal "true"
+
+\end_inset
+
+ to give the upper confidence limit 
+\begin_inset Formula $\lambda_{u}=\gamma^{-1}\left(K,y\right)$
+\end_inset
+
+ and the lower limit 
+\begin_inset Formula $\lambda_{l}=\gamma^{-1}\left(K,1-y\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $y=\left(1-CL\right)/2$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Confirmation of Poisson Confidence Limits
+\end_layout
+
+\begin_layout Standard
+REPRODUCE COVERAGE PLOT FROM CAMERON2011 FOR POISSON.
+\end_layout
+
+\begin_layout Section
+Discussion
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:discussion"
+
+\end_inset
+
+Determining which distribution represents a sample is straightforward when
+ the properties of the data exactly match the properties of a particular
+ distribution such as the binomial (Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:BinomialDist"
+
+\end_inset
+
+) or the Poisson (Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:PoissonDist"
+
+\end_inset
+
+).
+ However, it is often the case that the data are assumed to be normally
+ distributed.
+ Sometimes this is done for simplicity and sometimes because the true distributi
+on may be difficult to ascertain depending on what is being measured or
+ how the measurements are being performed.
+ If the assumed distribution is not the one from which the data are actually
+ drawn, then any confidence limits reported from it will contain an error
+ that comes not from how the data are distributed, but from the incorrect
+ assumption of underlying distribution.
+ This “error in the error bars” we call the 
+\shape italic
+intrinsic error
+\shape default
+ as it is the error introduced intrinsically by incorrect choice of underlying
+ distribution rather than extrinsically from a measurement error.
+\end_layout
+
+\begin_layout Standard
+We compare the confidence limits from the three distributions discussed
+ in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:CalcConfLims"
+
+\end_inset
+
+ in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:compare_all"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Comparison of Normal to Poisson
+\end_layout
+
+\begin_layout Standard
+The normal approximation to the Poisson distribution (dashed lines) generally
+ over-represents the upper limits and under-represents the lower limits
+ as in the binomial case, but the agreement varies over the parameter space
+ of 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{total}$
+\end_inset
+
+ with 
+\begin_inset Formula $\Delta p\le0.1$
+\end_inset
+
+ with the limits having the best agreement at large 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ However, the lower limits are forced to have stronger agreement at large
+ 
+\begin_inset Formula $N$
+\end_inset
+
+ due to the clipping discussed above.
+\end_layout
+
+\begin_layout Subsection
+Comparison of Normal to Binomial
+\end_layout
+
+\begin_layout Standard
+We see that the normal approximation to the binomial distribution (dotted
+ lines) consistently over-represents the upper confidence limits and under-repre
+sents the lower limits by 
+\begin_inset Formula $\Delta p\ge0.1$
+\end_inset
+
+ except when 
+\begin_inset Formula $N_{total}\ge50$
+\end_inset
+
+ and 
+\begin_inset Formula $\sigma\le2$
+\end_inset
+
+– a consequence of the Central Limit Theorem.
+\end_layout
+
+\begin_layout Subsection
+Comparison of Poisson to Binomial
+\end_layout
+
+\begin_layout Standard
+We use the standard Poisson approximation to the binomial distribution with
+ the substitution 
+\begin_inset Formula $p=\lambda/N_{total}$
+\end_inset
+
+.
+ At large 
+\begin_inset Formula $N$
+\end_inset
+
+, we see that the Poisson approximation deviates from the binomial distribution
+ significantly such that the given confidence limits exceed the interval
+ 
+\begin_inset Formula $\left[0,1\right]$
+\end_inset
+
+ allowed in probability theory.
+ This deviation arises because this substitution only holds when 
+\begin_inset Formula $p\,N_{total}\le10$
+\end_inset
+
+– which is clearly violated at large N.
+ For the normal distribution, the symmetry of the confidence limits about
+ the event probability combined with their large values at small N, pushes
+ them outside the allowed interval as well.
+ Therefore, we clip the confidence limits to the allowed range.
+\end_layout
+
+\begin_layout Standard
+The Poisson approximation to the binomial most strongly deviates near 
+\begin_inset Formula $N\approx0.5\,N_{total}$
+\end_inset
+
+ with the skew being dependent upon 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{total}$
+\end_inset
+
+.
+ The strong agreement at large 
+\begin_inset Formula $N$
+\end_inset
+
+ is, again, a consequence of the clipping necessitated due to the violation
+ of the conditions of the approximation 
+\begin_inset Formula $p=\lambda/N_{total}$
+\end_inset
+
+ in the regimes.
+ We also note that this approximation converges to the normal approximation
+ to the binomial at large 
+\begin_inset Formula $N$
+\end_inset
+
+; again, as the Central Limit Theorem demands.
+\begin_inset Float figure
+wide true
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename compare_all.ps
+	display false
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Comparison of upper (black) and lower (grey) confidence limits (p) for the
+ Poisson (dashed),binomial (solid), and normal (dotted) distributions.
+ The rows are of constant confidence level and the columns of constant total
+ number of observations, 
+\begin_inset Formula $N_{total}$
+\end_inset
+
+.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:compare_all"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Comparison to Gehrels
+\end_layout
+
+\begin_layout Standard
+As was shown in 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "cameron2011"
+literal "true"
+
+\end_inset
+
+, the 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "clopper1934"
+literal "true"
+
+\end_inset
+
+ method of determining confidence limits for the binomial distribution provides
+ insufficient coverage.
+ Since the G86 results are based on this approach, we caution against their
+ usage and encourage astronomers to update their perspectives on these statistic
+al computations.
+\end_layout
+
+\begin_layout Standard
+Can we derive the G86 results using the Cephes methods? Yes, use Krishnamoorthy
+ pg 38 and some derivations, focusing on the parameters to the beta distribution
+ for single-sided limits.
+\end_layout
+
+\begin_layout Standard
+Interestingly, using the parameters 
+\begin_inset Formula $p_{u}=1-B^{-1}\left(N-N_{s},N_{s}+1,1-CL\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p_{l}=1-\left(1-B^{-1}\left(N_{s},\,N-N_{s}+1,\,1-CL\right)\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $B^{-1}\left(a,b;y\right)$
+\end_inset
+
+ is given in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:binConfLimits"
+
+\end_inset
+
+.
+ For the Poisson, the upper confidence limit is given by 
+\begin_inset Formula $\lambda_{u}=\gamma^{-1}\left(K+1,1-CL\right)$
+\end_inset
+
+, and the lower limit by 
+\begin_inset Formula $\lambda_{l}=\gamma^{-1}\left(K,CL\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $CL$
+\end_inset
+
+ is the desired confidence level given by Equation
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+In this work, we have analyzed the need for carefully computing confidence
+ limits for small datasets.
+ We have presented novel methods of finding these confidence limits by mirroring
+ the methods of the Cephes math library to invert the binomial and Poisson
+ distributions.
+ We have presented a comparison of confidence limits given by the de facto
+ normal distribution 
+\begin_inset Quotes eld
+\end_inset
+
+root-N
+\begin_inset Quotes erd
+\end_inset
+
+ approximation with the binomial and Poisson distributions.
+ We have compared our methods with those of G86 currently in widespread
+ use.
+ We have provided code written in several of the popular languages used
+ in the astrophysics community which robustly implement our methods.
+ Our results are summarized as follows.
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+begingroup
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+renewcommand
+\backslash
+theenumi{(
+\backslash
+roman{enumi})}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+renewcommand
+\backslash
+labelenumi{
+\backslash
+theenumi}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+When presenting confidence limits on values computed as fractions, binomial
+ statistics should always be used.
+\end_layout
+
+\begin_layout Enumerate
+Because of the small region in which the Poisson approximation to the binomial
+ distribution, 
+\begin_inset Formula $p=\lambda/N_{total}$
+\end_inset
+
+, is effective, we recommend against its usage.
+\end_layout
+
+\begin_layout Enumerate
+Given the general nature of the Poisson distribution's characteristics,
+ we recommend using it as the assumed distribution when 
+\begin_inset Formula $N\le50$
+\end_inset
+
+ and the method of observation does not match the Bernoulli trial characterizati
+on of the binomial distribution.
+\end_layout
+
+\begin_layout Enumerate
+We find that the de facto normal 
+\begin_inset Quotes eld
+\end_inset
+
+root-N
+\begin_inset Quotes erd
+\end_inset
+
+ approximation to the binomial and Poisson distributions is sufficient (
+\begin_inset Formula $\Delta p\le0.1$
+\end_inset
+
+) only at the 1-sigma confidence level and when 
+\begin_inset Formula $N_{total}\ge50$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+endgroup{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Using Our Code
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Using-Our-Code"
+
+\end_inset
+
+To facilitate the usage of our methods, we provide code written in three
+ of the most common languages found in the astrophysical community: IDL,
+ Python, and Perl.
+ Additionally, the Cephes library (from which our methods are ultimately
+ derived) is available for C programmers, but we do not provide a wrapper
+ implementing the functionality of our code.
+ The IDL code is self-contained, relying only on a few features of IDL version
+ 5.3 and above.
+ The Perl code relies on the Math::Cephes module available on CPAN.
+ The Python code relies on the NumPy and SciPy libraries.
+ All three variants of our code are available at our github repository (www.githu
+b.com/hainest/SmallNumberStatistics).
+\end_layout
+
+\begin_layout Standard
+Although we do not provide code for it, the R
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+http://www.r-project.org/
+\end_layout
+
+\end_inset
+
+ language is capable of computing the confidence limits for many of the
+ more esoteric probability distributions, in addition to the normal, binomial,
+ and Poisson.
+ One nice feature of the R language is that it allows you to compute the
+ quartile instead of the probability.
+ The quartile is the smallest number of events for which the sum (integral)
+ of the probability density function matches the cumulative probability.
+ This is quite useful for computing the expected number of binomial or Poisson
+ events for the Chi-squared distribution.
+ Using a pseudo-syntax closely resembling that of Python, we present two
+ use cases for our code.
+\end_layout
+
+\begin_layout Subsection
+Binomial
+\end_layout
+
+\begin_layout Standard
+We wish to find the number of red galaxies as a fraction of all galaxies
+ appearing in bins of mass.
+ A particular bin has 15 galaxies (4 reds and 11 blues) in it.
+ We use the binomial distribution to report the fraction of red-to-blue
+ galaxies where the number of red galaxies is taken as the number of 
+\begin_inset Quotes eld
+\end_inset
+
+successes
+\begin_inset Quotes erd
+\end_inset
+
+ at the 
+\begin_inset Formula $2.5-\sigma$
+\end_inset
+
+ confidence level.
+ To do this, we use 
+\family typewriter
+binomialLimits(4, 15, 2.5, sigma=True)
+\family default
+ giving an upper limit of 0.618146 and a lower limit of 0.051830.
+ These are the confidence limits, so the error value is the difference between
+ the limit and the probability (here, 
+\begin_inset Formula $4/15\thickapprox0.26$
+\end_inset
+
+) with the convention that the lower limit is shown as negative.
+ The fraction is reported as 
+\begin_inset Formula $0.26_{-0.2148}^{+0.3514}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Poisson
+\end_layout
+
+\begin_layout Standard
+Let's say we are measuring the number of supernovae explosions per month
+ seen in nearby galaxies.
+ If we measure 20 explosions over a period of 8 months, then we can use
+ the Poisson distribution to report our result at the 95% confidence level
+ using
+\family typewriter
+ poissonLimits(20, 0.95, sigma=False)
+\family default
+ giving an upper limit of 29.0620 and a lower limit of 13.2546.
+ Recall that the Poisson parameter is defined as the average rate, so it
+ is necessary to divide these values by the interval over which they were
+ observed.
+ Additionally, these are confidence limits, so the error value is the difference
+ between the limit and the mean (here, 
+\begin_inset Formula $20/8\approx2.5$
+\end_inset
+
+) with the convention that the lower limit is shown as negative.
+ The fraction is reported as 
+\begin_inset Formula $2.5_{-0.8432}^{+1.1328}$
+\end_inset
+
+ SNe per month.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+acknowledgements{The authors wish to extend a great thanks to Dr.
+ Thomas Fisher from the UMKC Department of Mathematics and Statistics for
+ his excellent commentary, and helpful insights.}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "smallNumberStatistics"
+options "bibtotoc,apj"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

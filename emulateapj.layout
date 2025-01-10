@@ -1,0 +1,7 @@
+#% Do not delete the line below; configure depends on this
+#  \DeclareLaTeXClass[emulateapj]{article (emulateapj)}
+ 
+# Input general definitions
+Input stdclass.inc
+
+Provides natbib 1
